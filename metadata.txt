@@ -1,0 +1,39 @@
+# This file contains metadata for your plugin. Since 
+# version 2.0 of QGIS this is the proper way to supply 
+# information about a plugin. The old method of 
+# embedding metadata in __init__.py will 
+# is no longer supported since version 2.0.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=Least-Cost-Paths Network
+qgisMinimumVersion=2.0
+description=Compute the LCP network from multiple origins to multiple destinations
+version=0.1
+author=Xavier Rubio-Campillo
+email=xavier.rubio@ed.ac.uk
+
+about=This plugin applies an LCP algorithm to a cost surface map to get optimal paths between multiple locations.
+
+tracker=https://github.com/xrubio/lcpNetwork/issues
+repository=https://github.com/xrubio/lcpNetwork
+# End of mandatory metadata
+
+# Recommended items:
+
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=analysis, ecology, routing, archaeology, paths
+
+homepage=
+category=Plugins
+icon=icon.png
+# experimental flag
+experimental=True
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
