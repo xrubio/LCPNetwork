@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon
+from PyQt4.QtGui import QAction, QIcon, QFileDialog
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
@@ -65,6 +65,15 @@ class LCPNetwork:
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'LCPNetwork')
         self.toolbar.setObjectName(u'LCPNetwork')
+
+        # Create the dialog (after translation) and keep reference
+        self.dlg = LCPNetworkDialog()
+        self.dlg.outputFile.clear()
+        self.dlg.browseOutput.clicked.connect(self.selectOutputFile)
+
+    def selectOutputFile(self):
+        fileName = QFileDialog.getSaveFileName(self.dlg, "Select output file ","", '*.tif')
+        self.dlg.outputFile.setText(fileName)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -132,9 +141,6 @@ class LCPNetwork:
         :rtype: QAction
         """
 
-        # Create the dialog (after translation) and keep reference
-        self.dlg = LCPNetworkDialog()
-
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -182,12 +188,32 @@ class LCPNetwork:
 
     def run(self):
         """Run method that performs all the real work"""
+        layers = self.iface.legendInterface().layers()
+        layersList = []
+        for layer in layers:
+            layersList.append(layer.name())
+        self.dlg.inputLayerList.addItems(layersList)
+
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
+            self.runAlgorithm(layers)
+
+    def runAlgorithm(self, layers):
+        outputName = self.dlg.outputFile.text()
+        outputFile = open(outputName, 'w')
+        
+        selectedInputIndex = self.dlg.inputLayerList.currentIndex()
+        selectedInput = layers[selectedInputIndex]
+        fields = selectedInput.pendingFields()
+        fieldNames = [field.name() for field in fields]
+
+        for feature in selectedInput.getFeatures():
+            line = ';'.join(unicode(feature[x]) for x in fieldNames) + '\n'
+            unicodeLine = line.encode('utf-8')
+            outputFile.write(unicodeLine)
+        outputFile.close()
+
