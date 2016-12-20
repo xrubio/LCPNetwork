@@ -21,12 +21,19 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon, QFileDialog
+from PyQt4.QtGui import QAction, QIcon, QFileDialog    
+
+from qgis.core import QgsMapLayer, QgsMapLayerRegistry
+
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
 from lcp_network_dialog import LCPNetworkDialog
 import os.path
+from osgeo import gdal
+
+
+import numpy
 
 
 class LCPNetwork:
@@ -190,7 +197,13 @@ class LCPNetwork:
         """Run method that performs all the real work"""
         layers = self.iface.legendInterface().layers()
         layersList = []
+
+        # get raster layers
         for layer in layers:
+            foo = layer.type()
+            print(foo)
+            if layer.type() != QgsMapLayer.RasterLayer:
+                continue
             layersList.append(layer.name())
         self.dlg.inputLayerList.addItems(layersList)
 
@@ -202,10 +215,12 @@ class LCPNetwork:
         if result:
             self.runAlgorithm(layers)
 
-    def runAlgorithm(self, layers):
+
+    def runBaseAlgorithm(self, layers):
         outputName = self.dlg.outputFile.text()
         outputFile = open(outputName, 'w')
         
+        # select vector layer
         selectedInputIndex = self.dlg.inputLayerList.currentIndex()
         selectedInput = layers[selectedInputIndex]
         fields = selectedInput.pendingFields()
@@ -216,4 +231,38 @@ class LCPNetwork:
             unicodeLine = line.encode('utf-8')
             outputFile.write(unicodeLine)
         outputFile.close()
+
+
+
+
+    def runAlgorithm(self, layers):
+        print('starting algorithm')
+
+        baseRasterName= self.dlg.inputLayerList.currentText()
+        baseRaster = None
+        for layer in layers:
+            if layer.name() == baseRasterName:
+               baseRaster = layer
+               break
+
+        baseCRS = baseRaster.crs()
+        print baseCRS.toProj4()
+        print('dims:',baseRaster.width(), baseRaster.height())
+        print('upp:',baseRaster.rasterUnitsPerPixelX(),baseRaster.rasterUnitsPerPixelY())
+
+        outputName = "prova.tif"
+        newRaster = gdal.GetDriverByName('GTiff').Create(outputName, baseRaster.width(), baseRaster.height(), 1, gdal.GDT_Int32)
+      
+        RasterPath= str(QgsMapLayerRegistry.instance().mapLayersByName(baseRasterName)[0].dataProvider().dataSourceUri())
+        gdal_raster=gdal.Open(RasterPath)
+        gt=gdal_raster.GetGeoTransform()
+        projection= gdal_raster.GetProjection()    
+
+        newRaster.SetProjection(projection)
+        newRaster.SetGeoTransform(gt)
+    
+        newRaster.GetRasterBand(1).Fill(numpy.nan)
+        newRaster.GetRasterBand(1).SetNoDataValue(-9999)
+        randomValues = numpy.random.randint(0,100,[newRaster.RasterYSize, newRaster.RasterXSize])
+        newRaster.GetRasterBand(1).WriteArray(randomValues,0,0)
 
