@@ -23,7 +23,7 @@
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon, QFileDialog    
 
-from qgis.core import QgsMapLayer, QgsMapLayerRegistry
+from qgis.core import QgsMapLayer, QgsMapLayerRegistry, QGis, QgsPoint
 
 # Initialize Qt resources from file resources.py
 import resources
@@ -31,7 +31,6 @@ import resources
 from lcp_network_dialog import LCPNetworkDialog
 import os.path
 from osgeo import gdal
-
 
 import numpy
 
@@ -193,27 +192,29 @@ class LCPNetwork:
         del self.toolbar
 
 
+    def loadLayers(self): 
+        layers = self.iface.mapCanvas().layers()
+        for layer in layers:
+            if layer.type() == QgsMapLayer.RasterLayer:
+                self.dlg.baseLayer.addItem(layer.name(), layer.id())
+            elif layer.geometryType() == QGis.Point:
+                self.dlg.pointsLayer.addItem(layer.name(), layer.id())
+                
+    def clearUI(self):
+        self.dlg.baseLayer.clear()
+        self.dlg.pointsLayer.clear()
+
     def run(self):
         """Run method that performs all the real work"""
-        layers = self.iface.legendInterface().layers()
-        layersList = []
-
-        # get raster layers
-        for layer in layers:
-            foo = layer.type()
-            print(foo)
-            if layer.type() != QgsMapLayer.RasterLayer:
-                continue
-            layersList.append(layer.name())
-        self.dlg.inputLayerList.addItems(layersList)
-
+        self.clearUI()
+        self.loadLayers()
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
-            self.runAlgorithm(layers)
+            self.runAlgorithm()
 
 
     def runBaseAlgorithm(self, layers):
@@ -231,38 +232,55 @@ class LCPNetwork:
             unicodeLine = line.encode('utf-8')
             outputFile.write(unicodeLine)
         outputFile.close()
-
-
-
-
-    def runAlgorithm(self, layers):
-        print('starting algorithm')
-
-        baseRasterName= self.dlg.inputLayerList.currentText()
-        baseRaster = None
-        for layer in layers:
-            if layer.name() == baseRasterName:
-               baseRaster = layer
-               break
-
-        baseCRS = baseRaster.crs()
-        print baseCRS.toProj4()
-        print('dims:',baseRaster.width(), baseRaster.height())
-        print('upp:',baseRaster.rasterUnitsPerPixelX(),baseRaster.rasterUnitsPerPixelY())
-
-        outputName = "prova.tif"
-        newRaster = gdal.GetDriverByName('GTiff').Create(outputName, baseRaster.width(), baseRaster.height(), 1, gdal.GDT_Int32)
-      
-        RasterPath= str(QgsMapLayerRegistry.instance().mapLayersByName(baseRasterName)[0].dataProvider().dataSourceUri())
-        gdal_raster=gdal.Open(RasterPath)
-        gt=gdal_raster.GetGeoTransform()
-        projection= gdal_raster.GetProjection()    
-
-        newRaster.SetProjection(projection)
-        newRaster.SetGeoTransform(gt)
     
-        newRaster.GetRasterBand(1).Fill(numpy.nan)
-        newRaster.GetRasterBand(1).SetNoDataValue(-9999)
-        randomValues = numpy.random.randint(0,100,[newRaster.RasterYSize, newRaster.RasterXSize])
-        newRaster.GetRasterBand(1).WriteArray(randomValues,0,0)
+
+
+    def loadPoints(self):   
+        index = self.dlg.pointsLayer.currentIndex()
+        layer = self.dlg.pointsLayer.itemData(index)
+        return QgsMapLayerRegistry.instance().mapLayer(layer)
+
+    def loadBaseRaster(self):
+        index = self.dlg.baseLayer.currentIndex()
+        layer = self.dlg.baseLayer.itemData(index)
+        path= str(QgsMapLayerRegistry.instance().mapLayer(layer).dataProvider().dataSourceUri())
+        return gdal.Open(path)
+
+    def runAlgorithm(self):
+        # TODO 1 - add new raster map to canvas
+        # TODO 2 - only selected features
+
+        print('loading points and base raster layers')
+        points = self.loadPoints()
+        baseRaster = self.loadBaseRaster()
+
+        print('rasterizing '+str(points.featureCount())+' points')
+        for feature in points.getFeatures(): 
+            point = feature.geometry().asPoint()
+
+
+        transform = baseRaster.GetGeoTransform()    
+        print('top-left pixel: '+str(transform[0])+'/'+str(transform[3])+' res: '+str(transform[1])+'/'+str(transform[5])+' dims: '+str(baseRaster.RasterXSize)+'/'+str(baseRaster.RasterYSize))
+
+        topLeft = QgsPoint(transform[0], transform[3])
+
+        outputValues = numpy.zeros([baseRaster.RasterYSize, baseRaster.RasterXSize])
+
+        for feature in points.getFeatures(): 
+            point = feature.geometry().asPoint()
+            pointInRaster = QgsPoint(point.x() - topLeft.x(), topLeft.y() - point.y())
+            cell = QgsPoint(pointInRaster.x()/transform[1], pointInRaster.y()/-transform[5])
+            print('\t'+point.toString()+' -> '+pointInRaster.toString() + '-> ' + cell.toString())
+
+            if cell.x() < 0 or cell.x() >= baseRaster.RasterXSize or cell.y() <0 or cell.y() >= baseRaster.RasterYSize :
+                continue
+
+            outputValues[cell.y(),cell.x()] = 1
+
+        outputName = self.dlg.outputFile.currentText()
+        newRaster = gdal.GetDriverByName('GTiff').Create(outputName, baseRaster.RasterXSize, baseRaster.RasterYSize, 1, gdal.GDT_Int32)
+        newRaster.SetProjection(baseRaster.GetProjection())
+        newRaster.SetGeoTransform(baseRaster.GetGeoTransform())
+        newRaster.GetRasterBand(1).WriteArray(outputValues,0,0)
+                    
 

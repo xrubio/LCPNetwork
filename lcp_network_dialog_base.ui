@@ -29,7 +29,7 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="inputLayerList">
+  <widget class="QComboBox" name="pointsLayer">
    <property name="geometry">
     <rect>
      <x>200</x>
@@ -56,7 +56,7 @@
    <property name="geometry">
     <rect>
      <x>310</x>
-     <y>90</y>
+     <y>190</y>
      <width>51</width>
      <height>31</height>
     </rect>
@@ -69,7 +69,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>100</y>
+     <y>190</y>
      <width>71</width>
      <height>18</height>
     </rect>
@@ -82,10 +82,33 @@
    <property name="geometry">
     <rect>
      <x>120</x>
+     <y>190</y>
+     <width>171</width>
+     <height>32</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="baseLayer">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
      <y>90</y>
      <width>171</width>
      <height>32</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>90</y>
+     <width>141</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Base raster layer</string>
    </property>
   </widget>
  </widget>
