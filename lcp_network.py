@@ -32,8 +32,8 @@ from lcp_network_dialog import LCPNetworkDialog
 import os.path
 from osgeo import gdal
 
-import numpy
-
+import numpy as np
+from qgis.core import QgsMessageLog
 
 class LCPNetwork:
     """QGIS Plugin Implementation."""
@@ -246,41 +246,187 @@ class LCPNetwork:
         path= str(QgsMapLayerRegistry.instance().mapLayer(layer).dataProvider().dataSourceUri())
         return gdal.Open(path)
 
+    def getCell( self, point, surface ):
+        """ get local coordinates for point in surface """
+
+        transform = surface.GetGeoTransform()
+        topLeft = QgsPoint(transform[0], transform[3])
+
+        pointInRaster = QgsPoint(point.x() - topLeft.x(), topLeft.y() - point.y())
+        cell = QgsPoint(int(pointInRaster.x()/transform[1]), int(pointInRaster.y()/-transform[5]))
+        return cell
+
+    def isInside(self, cell, surface ):
+        """ returns true if cellin surface or false if it is not """
+        if cell.x() < 0 or cell.x() >= surface.RasterXSize or cell.y() <0 or cell.y() >= surface.RasterYSize :
+            return False
+        return True
+
+
+    def getNeighbors(self, point, surface ):
+        """ current: only four direxct neighbors """
+        neighbors = list()
+
+        candidate = QgsPoint(point.x()-1, point.y())
+        if self.isInside(candidate, surface):
+            neighbors.append(candidate)
+
+        candidate = QgsPoint(point.x()+1, point.y())
+        if self.isInside(candidate, surface):
+            neighbors.append(candidate)
+
+        candidate = QgsPoint(point.x(), point.y()-1)
+        if self.isInside(candidate, surface):
+            neighbors.append(candidate)
+
+        candidate = QgsPoint(point.x(), point.y()+1)
+        if self.isInside(candidate, surface):
+            neighbors.append(candidate)
+
+        QgsMessageLog.logMessage("num neighbors of: "+point.toString(0) + " is: " + str(len(neighbors)), "LCPNetwork")
+        return neighbors            
+
+    def getMinimumUnvisited(self, visited, distances ):
+        width, height = visited.shape
+        minDistance = np.inf
+
+        candidatesX = list()
+        candidatesY = list()
+
+        for i in range(width):
+            for j in range(height):
+                if visited[i,j]:
+                    continue
+                if distances[i,j] < minDistance:
+                    candidatesX = list()
+                    candidatesY = list()
+
+                    minDistance = distances[i,j]
+                    candidatesX.append(i)
+                    candidatesY.append(j)
+
+                elif distances[i,j] == minDistance:
+                    candidatesX.append(i)
+                    candidatesY.append(j)
+
+        # get all cells with value == minDistance
+        QgsMessageLog.logMessage("min distances: " + str(minDistance) + " and candidates: " + str(len(candidatesX)), "LCPNetwork")
+#        minDistanceEval = np.array([minDistance in distances]) 
+        # minDistanceEval = np.isin(distances, minDistance)
+#        candidates = np.where(minDistanceEval)
+#        candidates = np.where(distances == minDistance)
+
+        # each element of the tuple is a dimension so candidates[0] are all X values and candidates[1] are all Y values
+        selected = np.random.randint(len(candidatesX))
+
+        QgsMessageLog.logMessage("number of candidates: " + str(len(candidatesX)) + " selected: " + str(selected), "LCPNetwork")
+        #for index in range(len(candidates[0])):
+            # QgsMessageLog.logMessage("indexes: "+str(candidates[0][index])+"/"+str(candidates[1][index]), "LCPNetwork")
+
+        return QgsPoint(candidatesX[selected], candidatesY[selected])
+
+
+    def computeLCP( self, originGeo, destinationGeo, frictionSurface ):
+        QgsMessageLog.logMessage("computing LCP from: "+originGeo.toString(2)+ " to: "+destinationGeo.toString(2), "LCPNetwork")
+
+        origin = self.getCell(originGeo, frictionSurface)
+        destination = self.getCell(destinationGeo, frictionSurface)
+
+        if not self.isInside(origin, frictionSurface) or not self.isInside(destination, frictionSurface):
+            return False
+
+        QgsMessageLog.logMessage("local cells: from: "+origin.toString(0)+ " to: "+destination.toString(0), "LCPNetwork")
+
+        # initialize helper matrices
+        visited = np.full([frictionSurface.RasterXSize, frictionSurface.RasterYSize], False, dtype=bool)
+        distances = np.full([frictionSurface.RasterXSize, frictionSurface.RasterYSize], np.inf, dtype=float)
+
+        # initialize current
+        current = origin
+        visited[current.x(), current.y()] = True
+        distances[current.x(), current.y()] = 0
+
+        i = 0
+        while i < 10:
+            neighbors = self.getNeighbors(current, frictionSurface)
+            for neighbor in neighbors:
+                # TODO correct cost
+                tentativeDistance = distances[current.x(), current.y()] + 1
+                if distances[neighbor.x(), neighbor.y()] > tentativeDistance:
+                    distances[neighbor.x(), neighbor.y()] = tentativeDistance
+
+            visited[current.x(), current.y()] = True
+    
+            if visited[destination.x(), destination.y()] == True:
+                  return True
+
+            # get indexes for minimum value in matrix distances unvisited
+            current = self.getMinimumUnvisited(visited, distances)
+            QgsMessageLog.logMessage("next candidate: "+current.toString(0), "LCPNetwork")
+
+            i = i+1
+
     def runAlgorithm(self):
         # TODO 1 - add new raster map to canvas
         # TODO 2 - only selected features
 
-        print('loading points and base raster layers')
+        QgsMessageLog.logMessage('loading points and base raster layers', "LCPNetwork")
         points = self.loadPoints()
         baseRaster = self.loadBaseRaster()
 
-        print('rasterizing '+str(points.featureCount())+' points')
+        """
+        QgsMessageLog.logMessage('rasterizing '+str(points.featureCount())+' points', "LCPNetwork")
         for feature in points.getFeatures(): 
             point = feature.geometry().asPoint()
-
+        """
 
         transform = baseRaster.GetGeoTransform()    
-        print('top-left pixel: '+str(transform[0])+'/'+str(transform[3])+' res: '+str(transform[1])+'/'+str(transform[5])+' dims: '+str(baseRaster.RasterXSize)+'/'+str(baseRaster.RasterYSize))
+        QgsMessageLog.logMessage('top-left pixel: '+str(transform[0])+'/'+str(transform[3])+' res: '+str(transform[1])+'/'+str(transform[5])+' dims: '+str(baseRaster.RasterXSize)+'/'+str(baseRaster.RasterYSize), "LCPNetwork")
 
         topLeft = QgsPoint(transform[0], transform[3])
 
-        outputValues = numpy.zeros([baseRaster.RasterYSize, baseRaster.RasterXSize])
+        outputValues = np.zeros([baseRaster.RasterYSize, baseRaster.RasterXSize])
+    
+        """
+        for i in range(baseRaster.RasterYSize):
+            for j in range(baseRaster.RasterXSize):
+                outputValues[i,j] = np.random.randint(0,100)
 
+        """
+
+        pointsList = []
+        for point in points.getFeatures():
+            pointsList.append(point.geometry().asPoint())
+
+        QgsMessageLog.logMessage("num features: "+str(len(pointsList)),"LCPNetwork")
+        for source in range(len(pointsList)):
+            for destination in range(source+1,len(pointsList)):
+                result = self.computeLCP(pointsList[source], pointsList[destination], baseRaster)
+                # if error abort
+                if not result:
+                    QgsMessageLog.logMessage("error computing LCP Network")
+                    return
+
+        """                
         for feature in points.getFeatures(): 
             point = feature.geometry().asPoint()
             pointInRaster = QgsPoint(point.x() - topLeft.x(), topLeft.y() - point.y())
             cell = QgsPoint(pointInRaster.x()/transform[1], pointInRaster.y()/-transform[5])
-            print('\t'+point.toString()+' -> '+pointInRaster.toString() + '-> ' + cell.toString())
+            QgsMessageLog.logMessage('\t'+point.toString(2)+' -> '+pointInRaster.toString(2) + '-> ' + cell.toString(2), "LCPNetwork")
 
             if cell.x() < 0 or cell.x() >= baseRaster.RasterXSize or cell.y() <0 or cell.y() >= baseRaster.RasterYSize :
                 continue
 
-            outputValues[cell.y(),cell.x()] = 1
+            outputValues[cell.y(),cell.x()] = 100
 
-        outputName = self.dlg.outputFile.currentText()
+        outputName = self.dlg.outputFile.text()
+        if not outputName:
+            outputName = os.path.dirname(__file__)+"/output.tif"
+        QgsMessageLog.logMessage("output: "+outputName+ " with size: "+str(baseRaster.RasterXSize)+"x"+str(baseRaster.RasterYSize), "LCPNetwork")
         newRaster = gdal.GetDriverByName('GTiff').Create(outputName, baseRaster.RasterXSize, baseRaster.RasterYSize, 1, gdal.GDT_Int32)
         newRaster.SetProjection(baseRaster.GetProjection())
         newRaster.SetGeoTransform(baseRaster.GetGeoTransform())
         newRaster.GetRasterBand(1).WriteArray(outputValues,0,0)
-                    
+        newRaster.GetRasterBand(1).SetNoDataValue(0)
+        """
 
