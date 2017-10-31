@@ -276,24 +276,25 @@ class LCPNetwork:
         return True
 
 
-    def getNeighbors(self, point, surface ):
+    def getNeighbors(self, point, surface, costMap ):
         """ current: only four direct neighbors """
         neighbors = list()
+        nodata = int(surface.GetRasterBand(1).GetNoDataValue())
 
         candidate = QgsPoint(point.x()-1, point.y())
-        if self.isInside(candidate, surface):
+        if self.isInside(candidate, surface) and costMap[candidate.x(), candidate.y()] != nodata:
             neighbors.append(candidate)
 
         candidate = QgsPoint(point.x()+1, point.y())
-        if self.isInside(candidate, surface):
+        if self.isInside(candidate, surface) and costMap[candidate.x(), candidate.y()] != nodata:
             neighbors.append(candidate)
 
         candidate = QgsPoint(point.x(), point.y()-1)
-        if self.isInside(candidate, surface):
+        if self.isInside(candidate, surface) and costMap[candidate.x(), candidate.y()] != nodata:
             neighbors.append(candidate)
 
         candidate = QgsPoint(point.x(), point.y()+1)
-        if self.isInside(candidate, surface):
+        if self.isInside(candidate, surface) and costMap[candidate.x(), candidate.y()] != nodata:
             neighbors.append(candidate)
 
 #        QgsMessageLog.logMessage("num neighbors of: "+point.toString(0) + " is: " + str(len(neighbors)), "LCPNetwork")
@@ -318,7 +319,6 @@ class LCPNetwork:
         if not self.isInside(origin, baseRaster):
             return None
 
-
         # initialize helper matrices
         width,height = costValues.shape
         visited = np.full([width, height], False, dtype=bool)
@@ -332,10 +332,13 @@ class LCPNetwork:
 
         candidates = True
         while candidates: 
-            neighbors = self.getNeighbors(current, baseRaster)
+            neighbors = self.getNeighbors(current, baseRaster, costValues)
             for neighbor in neighbors:
                 
                 tentativeDistance = distances[current.x(), current.y()] + costValues[neighbor.x(), neighbor.y()]
+                # cost can never be negative
+                if tentativeDistance < 0:
+                    tentativeDistance = 0
                 if np.isnan(distances[neighbor.x(), neighbor.y()]) or distances[neighbor.x(), neighbor.y()] > tentativeDistance:
                     distances[neighbor.x(), neighbor.y()] = tentativeDistance
 
@@ -361,12 +364,13 @@ class LCPNetwork:
         width,height = costMap.shape
         
         current = destination
+    
         while current != origin:
             pathLine.append(current)
-            neighbors = self.getNeighbors(current, baseRaster)
+            neighbors = self.getNeighbors(current, baseRaster, costMap)
         
             minValue = costMap[current.x(), current.y()]
-        
+       
             for neighbor in neighbors:
         
                 # if already in path:
@@ -379,12 +383,10 @@ class LCPNetwork:
                 if alreadyInPath:
                     continue
 
-                if np.isnan(costMap[neighbor.x(),neighbor.y()]):
-                    continue
-
                 if costMap[neighbor.x(),neighbor.y()] <= minValue:
                     minValue = costMap[neighbor.x(),neighbor.y()]
                     current = neighbor
+
 
         pathLine.append(current)
 
@@ -417,7 +419,11 @@ class LCPNetwork:
         origins,destinations = self.loadPoints()
         baseRaster = self.loadBaseRaster()
 
-        transform = baseRaster.GetGeoTransform()    
+        transform = baseRaster.GetGeoTransform()
+        nodata = baseRaster.GetRasterBand(1).GetNoDataValue()  
+        QgsMessageLog.logMessage("NO DATA: "+str(nodata), "LCPNetwork")
+
+#        baseRaster.GetRasterBand(1).SetNoDataValue(-32768)
 #        QgsMessageLog.logMessage('top-left pixel: '+str(transform[0])+'/'+str(transform[3])+' res: '+str(transform[1])+'/'+str(transform[5])+' dims: '+str(baseRaster.RasterXSize)+'/'+str(baseRaster.RasterYSize), "LCPNetwork")
 #        QgsMessageLog.logMessage("base surface size: "+str(baseRaster.RasterXSize)+"x"+str(baseRaster.RasterYSize), "LCPNetwork")
         topLeft = QgsPoint(transform[0], transform[3])
@@ -436,9 +442,9 @@ class LCPNetwork:
         ## create the shapefile
         lineLayer = self.iface.addVectorLayer("LineString?crs=" + baseRaster.GetProjection(), "least cost path network", "memory")
 
-        progressBar = QProgressBar()
-        progressBar.setMaximum(len(pointsListO)*len(pointsListD))
-        self.iface.mainWindow().statusBar().addWidget(progressBar)
+#        progressBar = QProgressBar()
+#        progressBar.setMaximum(len(pointsListO)*len(pointsListD))
+#        self.iface.mainWindow().statusBar().addWidget(progressBar)
 
         for source in pointsListO:
 
@@ -466,9 +472,8 @@ class LCPNetwork:
                 ## set geometry from the list of QgsPoint's to the feature
                 features.setGeometry(QgsGeometry.fromPolyline(pathLine))
                 lineLayer.dataProvider().addFeatures([features])
-
             index = index + 1 
-            progressBar.setValue(index+1)
+#            progressBar.setValue(index+1)
     
-        QgsMessageLog.logMessage("seconds for plugin: " + str("%.2f"%(timeit.default_timer()--start)), "LCPNetwork")
+        QgsMessageLog.logMessage("seconds for plugin: " + str("%.2f"%(timeit.default_timer()-start)), "LCPNetwork")
 

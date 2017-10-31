@@ -1,25 +1,28 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis projectname="" version="2.18.11">
+<qgis projectname="" version="2.18.12">
   <title></title>
   <autotransaction active="0"/>
   <evaluateDefaultValues active="0"/>
   <layer-tree-group expanded="1" checked="Qt::PartiallyChecked" name="">
     <customproperties/>
-    <layer-tree-group expanded="1" checked="Qt::Checked" name="2 points small">
+    <layer-tree-group expanded="1" checked="Qt::Unchecked" name="2 points small">
       <customproperties/>
-      <layer-tree-layer expanded="1" providerKey="ogr" checked="Qt::Checked" id="pointsSmall20170816130753003" source="/home/xrubio/workspace/LCPNetwork/dataTest/pointsSmall.shp" name="pointsSmall">
+      <layer-tree-layer expanded="1" providerKey="ogr" checked="Qt::Unchecked" id="pointsSmall20170816130753003" source="/home/xrubio/workspace/LCPNetwork/dataTest/pointsSmall.shp" name="pointsSmall">
         <customproperties/>
       </layer-tree-layer>
-      <layer-tree-layer expanded="1" providerKey="gdal" checked="Qt::Checked" id="demSmall20170816130736113" source="/home/xrubio/workspace/LCPNetwork/dataTest/demSmall" name="demSmall">
+      <layer-tree-layer expanded="1" providerKey="gdal" checked="Qt::Unchecked" id="demSmall20170816130736113" source="/home/xrubio/workspace/LCPNetwork/dataTest/demSmall" name="demSmall">
         <customproperties/>
       </layer-tree-layer>
     </layer-tree-group>
-    <layer-tree-group expanded="1" checked="Qt::Unchecked" name="2 points large">
+    <layer-tree-group expanded="1" checked="Qt::PartiallyChecked" name="2 points large">
       <customproperties/>
       <layer-tree-layer expanded="1" providerKey="ogr" checked="Qt::Unchecked" id="points20170815154118790" source="/home/xrubio/workspace/LCPNetwork/dataTest/points.shp" name="points">
         <customproperties/>
       </layer-tree-layer>
-      <layer-tree-layer expanded="1" providerKey="gdal" checked="Qt::Unchecked" id="rugged20170816155136537" source="/home/xrubio/gis/tmp/rugged.tif" name="rugged">
+      <layer-tree-layer expanded="1" providerKey="ogr" checked="Qt::Checked" id="threePoints20170907154351052" source="/home/xrubio/workspace/LCPNetwork/dataTest/threePoints.shp" name="threePoints">
+        <customproperties/>
+      </layer-tree-layer>
+      <layer-tree-layer expanded="1" providerKey="gdal" checked="Qt::Checked" id="rugged20170816155136537" source="/home/xrubio/gis/tmp/rugged.tif" name="rugged">
         <customproperties/>
       </layer-tree-layer>
       <layer-tree-layer expanded="1" providerKey="gdal" checked="Qt::Unchecked" id="dem20170815154044035" source="/home/xrubio/workspace/LCPNetwork/dataTest/dem.tif" name="dem">
@@ -31,10 +34,10 @@
   <mapcanvas>
     <units>meters</units>
     <extent>
-      <xmin>-245816.27658424171386287</xmin>
-      <ymin>6576669.51703725848346949</ymin>
-      <xmax>-99931.92519499751506373</xmax>
-      <ymax>6752417.23197780642658472</ymax>
+      <xmin>-235669.98298141860868782</xmin>
+      <ymin>6612442.36484150309115648</ymin>
+      <xmax>-111977.91710053232964128</xmax>
+      <ymax>6717484.43855514843016863</ymax>
     </extent>
     <rotation>0</rotation>
     <projections>1</projections>
@@ -53,12 +56,12 @@
     <rendermaptile>0</rendermaptile>
     <layer_coordinate_transform_info>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818153027226"/>
-      <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_020170818155253302"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_120170818163344183"/>
+      <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_020170818155253302"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_020170818163334900"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_120170818154050417"/>
-      <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818153601027"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818163302463"/>
+      <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818153601027"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818152841864"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818155009537"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818153926661"/>
@@ -66,8 +69,8 @@
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_020170818153136147"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818153826314"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:3857" srcDatumTransform="-1" destDatumTransform="-1" layerid="OpenLayers_plugin_layer20170818110923690"/>
-      <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_network20170818133332018"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_120170818162547980"/>
+      <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_network20170818133332018"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_network20170818130823336"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_120170818155028411"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="demSmall20170816130736113"/>
@@ -83,11 +86,13 @@
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818154031554"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_120170818154153200"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_020170818154040989"/>
+      <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="threePoints20170907154351052"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818153126804"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="rugged20170816155136537"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_020170818155112138"/>
-      <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_020170818153610315"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818163325375"/>
+      <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_020170818153610315"/>
+      <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="prova20170907154328510"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_020170818154143883"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_network20170818102253435"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances20170818133331692"/>
@@ -95,6 +100,7 @@
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances_020170818160902692"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818152905055"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818152949162"/>
+      <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="dem20170815154044035"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="distances20170818123815767"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:3857" srcDatumTransform="-1" destDatumTransform="-1" layerid="Stamen_Watercolor_OSM20170818110758016"/>
       <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:27700" srcDatumTransform="-1" destDatumTransform="-1" layerid="least_cost_path_network20170818155449703"/>
@@ -107,30 +113,36 @@
       <item>demSmall20170816130736113</item>
       <item>pointsSmall20170816130753003</item>
       <item>rugged20170816155136537</item>
+      <item>threePoints20170907154351052</item>
     </custom-order>
   </layer-tree-canvas>
   <legend updateDrawingOrder="true">
-    <legendgroup open="true" checked="Qt::Checked" name="2 points small">
-      <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="pointsSmall" showFeatureCount="0">
+    <legendgroup open="true" checked="Qt::Unchecked" name="2 points small">
+      <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="pointsSmall" showFeatureCount="0">
         <filegroup open="true" hidden="false">
-          <legendlayerfile isInOverview="0" layerid="pointsSmall20170816130753003" visible="1"/>
+          <legendlayerfile isInOverview="0" layerid="pointsSmall20170816130753003" visible="0"/>
         </filegroup>
       </legendlayer>
-      <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="demSmall" showFeatureCount="0">
+      <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="demSmall" showFeatureCount="0">
         <filegroup open="true" hidden="false">
-          <legendlayerfile isInOverview="0" layerid="demSmall20170816130736113" visible="1"/>
+          <legendlayerfile isInOverview="0" layerid="demSmall20170816130736113" visible="0"/>
         </filegroup>
       </legendlayer>
     </legendgroup>
-    <legendgroup open="true" checked="Qt::Unchecked" name="2 points large">
+    <legendgroup open="true" checked="Qt::PartiallyChecked" name="2 points large">
       <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="points" showFeatureCount="0">
         <filegroup open="true" hidden="false">
           <legendlayerfile isInOverview="0" layerid="points20170815154118790" visible="0"/>
         </filegroup>
       </legendlayer>
-      <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="rugged" showFeatureCount="0">
+      <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="threePoints" showFeatureCount="0">
         <filegroup open="true" hidden="false">
-          <legendlayerfile isInOverview="0" layerid="rugged20170816155136537" visible="0"/>
+          <legendlayerfile isInOverview="0" layerid="threePoints20170907154351052" visible="1"/>
+        </filegroup>
+      </legendlayer>
+      <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="rugged" showFeatureCount="0">
+        <filegroup open="true" hidden="false">
+          <legendlayerfile isInOverview="0" layerid="rugged20170816155136537" visible="1"/>
         </filegroup>
       </legendlayer>
       <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="dem" showFeatureCount="0">
@@ -549,6 +561,14 @@ def my_form_open(dialog, layer, feature):
         <default field="id" expression=""/>
       </defaults>
       <previewExpression></previewExpression>
+      <globe>
+        <renderingMode mode="0"/>
+        <modelRendering lighting="1">
+          <altitude binding="0" clamping="1" verticalOffset="0" technique="3" verticalScale="0" clampingResolution="0"/>
+          <extrusion wall-gradient="0.5" enabled="0" height="10" flatten="0"/>
+          <labeling declutter="0" enabled="0" field=""/>
+        </modelRendering>
+      </globe>
     </maplayer>
     <maplayer simplifyAlgorithm="0" minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="0" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" readOnly="0" geometry="Point" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
       <extent>
@@ -858,6 +878,14 @@ def my_form_open(dialog, layer, feature):
         <default field="id" expression=""/>
       </defaults>
       <previewExpression></previewExpression>
+      <globe>
+        <renderingMode mode="0"/>
+        <modelRendering lighting="1">
+          <altitude binding="0" clamping="1" verticalOffset="0" technique="3" verticalScale="0" clampingResolution="0"/>
+          <extrusion wall-gradient="0.5" enabled="0" height="10" flatten="0"/>
+          <labeling declutter="0" enabled="0" field=""/>
+        </modelRendering>
+      </globe>
     </maplayer>
     <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
       <extent>
@@ -908,6 +936,133 @@ def my_form_open(dialog, layer, feature):
         <rasterresampler maxOversampling="2"/>
       </pipe>
       <blendMode>0</blendMode>
+    </maplayer>
+    <maplayer simplifyAlgorithm="0" minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="0" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" readOnly="0" geometry="Point" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+      <extent>
+        <xmin>396866.70173056330531836</xmin>
+        <ymin>133466.00095865241019055</ymin>
+        <xmax>433691.56007931253407151</xmax>
+        <ymax>164641.59126526399631985</ymax>
+      </extent>
+      <id>threePoints20170907154351052</id>
+      <datasource>./threePoints.shp</datasource>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>threePoints</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs</proj4>
+          <srsid>2437</srsid>
+          <srid>27700</srid>
+          <authid>EPSG:27700</authid>
+          <description>OSGB 1936 / British National Grid</description>
+          <projectionacronym>tmerc</projectionacronym>
+          <ellipsoidacronym>airy</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <provider encoding="UTF-8">ogr</provider>
+      <vectorjoins/>
+      <layerDependencies/>
+      <expressionfields/>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="id">
+          <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+        </edittype>
+      </edittypes>
+      <renderer-v2 forceraster="0" symbollevels="0" type="singleSymbol" enableorderby="0">
+        <symbols>
+          <symbol alpha="1" clip_to_extent="1" type="marker" name="0">
+            <layer pass="0" class="SimpleMarker" locked="0">
+              <prop k="angle" v="0"/>
+              <prop k="color" v="235,199,163,255"/>
+              <prop k="horizontal_anchor_point" v="1"/>
+              <prop k="joinstyle" v="bevel"/>
+              <prop k="name" v="circle"/>
+              <prop k="offset" v="0,0"/>
+              <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
+              <prop k="offset_unit" v="MM"/>
+              <prop k="outline_color" v="0,0,0,255"/>
+              <prop k="outline_style" v="solid"/>
+              <prop k="outline_width" v="0"/>
+              <prop k="outline_width_map_unit_scale" v="0,0,0,0,0,0"/>
+              <prop k="outline_width_unit" v="MM"/>
+              <prop k="scale_method" v="diameter"/>
+              <prop k="size" v="2"/>
+              <prop k="size_map_unit_scale" v="0,0,0,0,0,0"/>
+              <prop k="size_unit" v="MM"/>
+              <prop k="vertical_anchor_point" v="1"/>
+            </layer>
+          </symbol>
+        </symbols>
+        <rotation/>
+        <sizescale scalemethod="diameter"/>
+      </renderer-v2>
+      <labeling type="simple"/>
+      <customproperties/>
+      <blendMode>0</blendMode>
+      <featureBlendMode>0</featureBlendMode>
+      <layerTransparency>0</layerTransparency>
+      <displayfield>id</displayfield>
+      <label>0</label>
+      <labelattributes>
+        <label fieldname="" text="Label"/>
+        <family fieldname="" name="Noto Sans"/>
+        <size fieldname="" units="pt" value="12"/>
+        <bold fieldname="" on="0"/>
+        <italic fieldname="" on="0"/>
+        <underline fieldname="" on="0"/>
+        <strikeout fieldname="" on="0"/>
+        <color fieldname="" red="0" blue="0" green="0"/>
+        <x fieldname=""/>
+        <y fieldname=""/>
+        <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
+        <angle fieldname="" value="0" auto="0"/>
+        <alignment fieldname="" value="center"/>
+        <buffercolor fieldname="" red="255" blue="255" green="255"/>
+        <buffersize fieldname="" units="pt" value="1"/>
+        <bufferenabled fieldname="" on=""/>
+        <multilineenabled fieldname="" on=""/>
+        <selectedonly on=""/>
+      </labelattributes>
+      <annotationform></annotationform>
+      <aliases>
+        <alias field="id" index="0" name=""/>
+      </aliases>
+      <excludeAttributesWMS/>
+      <excludeAttributesWFS/>
+      <attributeactions default="-1"/>
+      <attributetableconfig actionWidgetStyle="dropDown" sortExpression="" sortOrder="2837">
+        <columns/>
+      </attributetableconfig>
+      <editform></editform>
+      <editforminit/>
+      <editforminitcodesource>0</editforminitcodesource>
+      <editforminitfilepath></editforminitfilepath>
+      <editforminitcode><![CDATA[]]></editforminitcode>
+      <featformsuppress>0</featformsuppress>
+      <editorlayout>generatedlayout</editorlayout>
+      <widgets/>
+      <conditionalstyles>
+        <rowstyles/>
+        <fieldstyles/>
+      </conditionalstyles>
+      <defaults>
+        <default field="id" expression=""/>
+      </defaults>
+      <previewExpression></previewExpression>
+      <globe>
+        <renderingMode mode="0"/>
+        <modelRendering lighting="1">
+          <altitude binding="0" clamping="1" verticalOffset="0" technique="3" verticalScale="0" clampingResolution="0"/>
+          <extrusion wall-gradient="0.5" enabled="0" height="10" flatten="0"/>
+          <labeling declutter="0" enabled="0" field=""/>
+        </modelRendering>
+      </globe>
     </maplayer>
   </projectlayers>
   <properties>
