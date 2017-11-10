@@ -48,7 +48,7 @@ PY_FILES = \
 
 UI_FILES = lcp_network_dialog_base.ui
 
-EXTRAS = metadata.txt icon.png
+EXTRAS = metadata.txt img/icon.png
 
 EXTRA_DIRS =
 

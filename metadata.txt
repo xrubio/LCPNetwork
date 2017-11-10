@@ -10,7 +10,7 @@
 name=Least-Cost-Paths Network
 qgisMinimumVersion=2.0
 description=Compute the LCP network from multiple origins to multiple destinations
-version=0.1
+version=version 0.1
 author=Xavier Rubio-Campillo
 email=xavier.rubio@ed.ac.uk
 
@@ -30,7 +30,7 @@ tags=analysis, ecology, routing, archaeology, paths
 
 homepage=
 category=Plugins
-icon=icon.png
+icon=img/icon.png
 # experimental flag
 experimental=True
 

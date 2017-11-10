@@ -184,7 +184,7 @@ class LCPNetwork:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/LCPNetwork/icon.png'
+        icon_path = ':/plugins/LCPNetwork/img/icon.png'
         self.add_action(
             icon_path,
             text=self.tr(u'LCP Network'),
@@ -282,19 +282,19 @@ class LCPNetwork:
         nodata = int(surface.GetRasterBand(1).GetNoDataValue())
 
         candidate = QgsPoint(point.x()-1, point.y())
-        if self.isInside(candidate, surface) and costMap[candidate.x(), candidate.y()] != nodata:
+        if self.isInside(candidate, surface) and costMap[int(candidate.x()), int(candidate.y())] != nodata:
             neighbors.append(candidate)
 
         candidate = QgsPoint(point.x()+1, point.y())
-        if self.isInside(candidate, surface) and costMap[candidate.x(), candidate.y()] != nodata:
+        if self.isInside(candidate, surface) and costMap[int(candidate.x()), int(candidate.y())] != nodata:
             neighbors.append(candidate)
 
         candidate = QgsPoint(point.x(), point.y()-1)
-        if self.isInside(candidate, surface) and costMap[candidate.x(), candidate.y()] != nodata:
+        if self.isInside(candidate, surface) and costMap[int(candidate.x()), int(candidate.y())] != nodata:
             neighbors.append(candidate)
 
         candidate = QgsPoint(point.x(), point.y()+1)
-        if self.isInside(candidate, surface) and costMap[candidate.x(), candidate.y()] != nodata:
+        if self.isInside(candidate, surface) and costMap[int(candidate.x()), int(candidate.y())] != nodata:
             neighbors.append(candidate)
 
 #        QgsMessageLog.logMessage("num neighbors of: "+point.toString(0) + " is: " + str(len(neighbors)), "LCPNetwork")
@@ -327,22 +327,22 @@ class LCPNetwork:
         # initialize current
         current = origin
 
-        visited[current.x(), current.y()] = True
-        distances[current.x(), current.y()] = 0
+        visited[int(current.x()), int(current.y())] = True
+        distances[int(current.x()), int(current.y())] = 0
 
         candidates = True
         while candidates: 
             neighbors = self.getNeighbors(current, baseRaster, costValues)
             for neighbor in neighbors:
                 
-                tentativeDistance = distances[current.x(), current.y()] + costValues[neighbor.x(), neighbor.y()]
+                tentativeDistance = distances[int(current.x()), int(current.y())] + costValues[int(neighbor.x()), int(neighbor.y())]
                 # cost can never be negative
                 if tentativeDistance < 0:
                     tentativeDistance = 0
-                if np.isnan(distances[neighbor.x(), neighbor.y()]) or distances[neighbor.x(), neighbor.y()] > tentativeDistance:
-                    distances[neighbor.x(), neighbor.y()] = tentativeDistance
+                if np.isnan(distances[int(neighbor.x()), int(neighbor.y())]) or distances[int(neighbor.x()), int(neighbor.y())] > tentativeDistance:
+                    distances[int(neighbor.x()), int(neighbor.y())] = tentativeDistance
 
-            visited[current.x(), current.y()] = True
+            visited[int(current.x()), int(current.y())] = True
 
             current = self.getMinimumUnvisited(visited, distances)
             if not current:
@@ -369,7 +369,7 @@ class LCPNetwork:
             pathLine.append(current)
             neighbors = self.getNeighbors(current, baseRaster, costMap)
         
-            minValue = costMap[current.x(), current.y()]
+            minValue = costMap[int(current.x()), int(current.y())]
        
             for neighbor in neighbors:
         
@@ -383,8 +383,8 @@ class LCPNetwork:
                 if alreadyInPath:
                     continue
 
-                if costMap[neighbor.x(),neighbor.y()] <= minValue:
-                    minValue = costMap[neighbor.x(),neighbor.y()]
+                if costMap[int(neighbor.x()),int(neighbor.y())] <= minValue:
+                    minValue = costMap[int(neighbor.x()),int(neighbor.y())]
                     current = neighbor
 
 
