@@ -282,19 +282,19 @@ class LCPNetwork:
         nodata = int(surface.GetRasterBand(1).GetNoDataValue())
 
         candidate = QgsPoint(point.x()-1, point.y())
-        if self.isInside(candidate, surface) and costMap[int(candidate.x()), int(candidate.y())] != nodata:
+        if self.isInside(candidate, surface): # and costMap[int(candidate.x()), int(candidate.y())] != nodata:
             neighbors.append(candidate)
 
         candidate = QgsPoint(point.x()+1, point.y())
-        if self.isInside(candidate, surface) and costMap[int(candidate.x()), int(candidate.y())] != nodata:
+        if self.isInside(candidate, surface): # and costMap[int(candidate.x()), int(candidate.y())] != nodata:
             neighbors.append(candidate)
 
         candidate = QgsPoint(point.x(), point.y()-1)
-        if self.isInside(candidate, surface) and costMap[int(candidate.x()), int(candidate.y())] != nodata:
+        if self.isInside(candidate, surface): # and costMap[int(candidate.x()), int(candidate.y())] != nodata:
             neighbors.append(candidate)
 
         candidate = QgsPoint(point.x(), point.y()+1)
-        if self.isInside(candidate, surface) and costMap[int(candidate.x()), int(candidate.y())] != nodata:
+        if self.isInside(candidate, surface): # and costMap[int(candidate.x()), int(candidate.y())] != nodata:
             neighbors.append(candidate)
 
 #        QgsMessageLog.logMessage("num neighbors of: "+point.toString(0) + " is: " + str(len(neighbors)), "LCPNetwork")
@@ -330,12 +330,24 @@ class LCPNetwork:
         visited[int(current.x()), int(current.y())] = True
         distances[int(current.x()), int(current.y())] = 0
 
+        nodata = int(baseRaster.GetRasterBand(1).GetNoDataValue())
+        stats= baseRaster.GetRasterBand(1).GetStatistics(0,1)
+        maxValue = stats[1]
+
+        QgsMessageLog.logMessage("no data: "+str(nodata)+" max:"+str(maxValue), "LCPNetwork")
+
         candidates = True
+        index = 0
         while candidates: 
             neighbors = self.getNeighbors(current, baseRaster, costValues)
             for neighbor in neighbors:
                 
-                tentativeDistance = distances[int(current.x()), int(current.y())] + costValues[int(neighbor.x()), int(neighbor.y())]
+                cost =  costValues[int(neighbor.x()), int(neighbor.y())]
+                # null values will be slight higher than the maximum cost in the map
+                if cost == nodata:
+                    cost = maxValue*1.01
+
+                tentativeDistance = distances[int(current.x()), int(current.y())] + cost
                 # cost can never be negative
                 if tentativeDistance < 0:
                     tentativeDistance = 0
