@@ -7,8 +7,6 @@ Least-Cost Path Networks in QGIS
 
 **Licence: GNU GPLv3**
 
-**Author: Xavier Rubio-Campillo ([github](https://github.com/xrubio))** 
-
 Method
 -------------
 Least-Cost Path (LCP) analysis compute optimal ways to move from an origin towards a destination point using a cost surface map.
