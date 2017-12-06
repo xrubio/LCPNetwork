@@ -184,10 +184,10 @@ class LCPNetwork:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/LCPNetwork/img/icon.png'
+        icon_path = ':/plugins/LCPNetwork/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'LCP Network'),
+            text=self.tr(u'&LCP Network'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
@@ -337,7 +337,6 @@ class LCPNetwork:
         QgsMessageLog.logMessage("no data: "+str(nodata)+" max:"+str(maxValue), "LCPNetwork")
 
         candidates = True
-        index = 0
         while candidates: 
             neighbors = self.getNeighbors(current, baseRaster, costValues)
             for neighbor in neighbors:

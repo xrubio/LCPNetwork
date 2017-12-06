@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/plugins/LCPNetwork" >
-        <file>img/icon.png</file>
+        <file>icon.png</file>
     </qresource>
 </RCC>
+

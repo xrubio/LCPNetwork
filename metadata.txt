@@ -9,15 +9,15 @@
 [general]
 name=Least-Cost-Paths Network
 qgisMinimumVersion=2.0
-description=Compute the LCP network from multiple origins to multiple destinations
-version=version 0.1
+description=Compute the network of Least-Cost Paths between multiple origins and destinations based on a cost surface map
+version=version 0.1.1
 author=Xavier Rubio-Campillo
 email=xavier.rubio@ed.ac.uk
 
-about=This plugin applies an LCP algorithm to a cost surface map to get optimal paths between multiple locations.
+about=LCPNetwork applies Dijkstra's algorithm to get optimal paths between a the features of 2 point vector layers. You will also need to specify a raster map of costs such as slope or a prominence index. The plugin will generate an accumulated cost map for each of the points and a line vector layer with all the optimal paths which can be used for further analysis.
 
-tracker=https://github.com/xrubio/lcpNetwork/issues
-repository=https://github.com/xrubio/lcpNetwork
+tracker=https://github.com/xrubio/LCPNetwork/issues
+repository=https://github.com/xrubio/LCPNetwork
 # End of mandatory metadata
 
 # Recommended items:
@@ -26,11 +26,11 @@ repository=https://github.com/xrubio/lcpNetwork
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=analysis, ecology, routing, archaeology, paths
+tags=analysis, ecology, routing, archaeology, mobility, Least-Cost Paths
 
-homepage=
+homepage=https://github.com/xrubio/LCPNetwork
 category=Plugins
-icon=img/icon.png
+icon=icon.png
 # experimental flag
 experimental=True
 
