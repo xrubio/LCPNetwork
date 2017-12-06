@@ -16,6 +16,7 @@ email=xavier.rubio@ed.ac.uk
 
 about=LCPNetwork applies Dijkstra's algorithm to get optimal paths between a the features of 2 point vector layers. You will also need to specify a raster map of costs such as slope or a prominence index. The plugin will generate an accumulated cost map for each of the points and a line vector layer with all the optimal paths which can be used for further analysis.
 
+homepage=https://github.com/xrubio/LCPNetwork
 tracker=https://github.com/xrubio/LCPNetwork/issues
 repository=https://github.com/xrubio/LCPNetwork
 # End of mandatory metadata
@@ -28,7 +29,6 @@ repository=https://github.com/xrubio/LCPNetwork
 # Tags are comma separated with spaces allowed
 tags=analysis, ecology, routing, archaeology, mobility, Least-Cost Paths
 
-homepage=https://github.com/xrubio/LCPNetwork
 category=Plugins
 icon=icon.png
 # experimental flag
