@@ -302,9 +302,22 @@ class LCPNetwork:
 
     def getMinimumUnvisited(self, visited, distances ):
 
-        # set to nul values of already visited (kind of a mask)
-        possibleValues = ma.masked_array(distances, mask=visited)
-        candidates = np.where(possibleValues == np.nanmin(possibleValues))  
+        # set to null values of already visited (kind of a mask)
+        possibleValues = ma.masked_array(distances, mask=visited, )
+
+#       for i in range(len(possibleValues)):
+#            QgsMessageLog.logMessage("value "+str(i)+" visited: "+str(visited[i])+" distances: "+str(distances[i])+" -> "+str(possibleValues[i]), "LCPNetwork")
+
+        # no available values because everything is already masked
+        if len(possibleValues[~possibleValues.mask])==0:
+            return None 
+
+        mininimumValues = np.nanmin(possibleValues[~possibleValues.mask])           
+#        QgsMessageLog.logMessage("minimum values: "+str(mininimumValues), "LCPNetwork")
+        candidates = np.where(possibleValues == mininimumValues) 
+
+#        for i in range(len(candidates[0])):
+#            QgsMessageLog.logMessage("\tcandidate "+str(i)+" -> "+str(candidates[0][i])+"/"+str(candidates[1][i]), "LCPNetwork")
 
         if len(candidates[0]) == 0:
             return None
@@ -337,28 +350,36 @@ class LCPNetwork:
         QgsMessageLog.logMessage("no data: "+str(nodata)+" max:"+str(maxValue), "LCPNetwork")
 
         candidates = True
-        while candidates: 
+        i = 0
+        while candidates==True: 
+            i = i+1
             neighbors = self.getNeighbors(current, baseRaster, costValues)
+#            QgsMessageLog.logMessage("iteration: "+str(i)+" current: "+str(current.x())+"/"+str(current.y())+" with num neighbors: "+str(len(neighbors)), "LCPNetwork")
+            
             for neighbor in neighbors:
+#                QgsMessageLog.logMessage("\tchecking neighbour: "+str(neighbor.x())+"/"+str(neighbor.y()), "LCPNetwork")
                 
                 cost =  costValues[int(neighbor.x()), int(neighbor.y())]
-                # null values will be slight higher than the maximum cost in the map
+                # null values will be slightly higher than the maximum cost in the map
                 if cost == nodata:
                     cost = maxValue*1.01
 
                 tentativeDistance = distances[int(current.x()), int(current.y())] + cost
+#               QgsMessageLog.logMessage("\ttentative distance: "+str(tentativeDistance)+" with distance: "+str(distances[int(current.x()), int(current.y())]) + " and cost: "+str(cost), "LCPNetwork")
                 # cost can never be negative
                 if tentativeDistance < 0:
                     tentativeDistance = 0
                 if np.isnan(distances[int(neighbor.x()), int(neighbor.y())]) or distances[int(neighbor.x()), int(neighbor.y())] > tentativeDistance:
+#                    QgsMessageLog.logMessage("\tchanging distance!", "LCPNetwork")
                     distances[int(neighbor.x()), int(neighbor.y())] = tentativeDistance
 
             visited[int(current.x()), int(current.y())] = True
 
             current = self.getMinimumUnvisited(visited, distances)
-            if not current:
+            if current is None:
                 candidates = False
 
+        QgsMessageLog.logMessage("finished with num. iterations: "+str(i), "LCPNetwork")
         return distances
 
 
@@ -458,24 +479,22 @@ class LCPNetwork:
 #        self.iface.mainWindow().statusBar().addWidget(progressBar)
 
         for source in pointsListO:
-
             # compute cost map for the entire area
-               
             startCost = timeit.default_timer()
+            QgsMessageLog.logMessage("computing cost map from source point: "+str(index)+" at position: "+str(source.x())+"/"+str(source.y()), "LCPNetwork") 
             distances = self.computeCost(source, baseRaster)
-            QgsMessageLog.logMessage("seconds to compute cost map: " + str("%.2f"%(timeit.default_timer()-startCost)), "LCPNetwork")
+            QgsMessageLog.logMessage("\tDone! seconds to compute cost map: " + str("%.2f"%(timeit.default_timer()-startCost)), "LCPNetwork")
 
-            if distances==None:
+            if distances is None:
                 QMessageBox.information(None, "ERROR!", "Cost map could not be computed for source point: "+str(index), "LCPNetwork")
                 return 
 
             self.storeCostMap(distances, baseRaster, index)
-
             for destination in pointsListD:
                 if destination == source:
                     continue
                 pathLine = self.getPath(source, destination, baseRaster, distances)
-                if pathLine==None:
+                if pathLine is None:
                     QMessageBox.information(None, "ERROR!", "Route could not be found for destination: "+str(index), "LCPNetwork")
                     return
                 
@@ -485,6 +504,6 @@ class LCPNetwork:
                 lineLayer.dataProvider().addFeatures([features])
             index = index + 1 
 #            progressBar.setValue(index+1)
-    
+
         QgsMessageLog.logMessage("seconds for plugin: " + str("%.2f"%(timeit.default_timer()-start)), "LCPNetwork")
 
