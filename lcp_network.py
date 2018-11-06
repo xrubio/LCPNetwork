@@ -390,19 +390,75 @@ class LCPNetwork:
 
 
 
-    def getPath( self, originGeo, destinationGeo, baseRaster, costMap, logMessageFile):
+    def getPath( self, current, origin, baseRaster, costMap, logMessageFile, pathLine):
+
+        if not self.isInside(origin, baseRaster) or not self.isInside(current, baseRaster):
+            return None
+
+        logMessage = "getting path from current: "+str(current.x())+"/"+str(current.y())+" to origin: "+str(origin.x())+"/"+str(origin.y())
+        QgsMessageLog.logMessage(logMessage, "LCPNetwork")
+        logMessageFile.write(logMessage+"\n")
+            
+        pathLine.append(current)
+
+        # finished!
+        if current==origin:
+            return pathLine
+              
+        minValue = costMap[int(current.x()), int(current.y())]
+
+        neighbors = self.getNeighbors(current, baseRaster, costMap)
+
+        candidates = []
+
+        for neighbor in neighbors:
+     
+            logMessage = "\t\t\tchecking neighbor: "+str(neighbor.x())+"/"+str(neighbor.y())
+            QgsMessageLog.logMessage(logMessage, "LCPNetwork")
+            logMessageFile.write(logMessage+"\n")
+
+            # if already in path:
+            alreadyInPath = False 
+            for pathPoint in pathLine:
+                if pathPoint.sqrDist(neighbor)<1.0:
+                    alreadyInPath = True
+                    break
+
+            if alreadyInPath:  
+                logMessage = "\t\t\tneighbor is already in path so it is ignored"
+                QgsMessageLog.logMessage(logMessage, "LCPNetwork")
+                logMessageFile.write(logMessage+"\n")
+                continue
+
+            logMessage = "\t\t\tcost map: "+str(costMap[int(neighbor.x()),int(neighbor.y())])
+            QgsMessageLog.logMessage(logMessage, "LCPNetwork")
+            logMessageFile.write(logMessage+"\n")
+
+            if costMap[int(neighbor.x()),int(neighbor.y())] < minValue:
+                candidates = []
+                candidates.append(neighbor)
+                minValue = costMap[int(neighbor.x()),int(neighbor.y())]
+            elif costMap[int(neighbor.x()),int(neighbor.y())] == minValue:
+                candidates.append(neighbor)
+
+        if len(candidates)==0:
+            return None
+
+        for candidate in candidates:
+            fullPath = self.getPath(candidate, origin, baseRaster, costMap, logMessageFile, pathLine)
+            if fullPath!=None:
+                return fullPath
+
+        return None                
+                
+    def getGlobalPath( self, originGeo, destinationGeo, baseRaster, costMap, logMessageFile):
     
-        pathLine = []
         origin = self.getCell(originGeo, baseRaster)
         destination = self.getCell(destinationGeo, baseRaster)
             
         if not self.isInside(destination, baseRaster):
             return None
 
-        width,height = costMap.shape
-        
-        current = destination
-    
         logMessage = "getting path from "+str(originGeo.x())+"/"+str(originGeo.y())+" to: "+str(destinationGeo.x())+"/"+str(destinationGeo.y())
         QgsMessageLog.logMessage(logMessage, "LCPNetwork")
         logMessageFile.write(logMessage+"\n")
@@ -411,61 +467,8 @@ class LCPNetwork:
         QgsMessageLog.logMessage(logMessage, "LCPNetwork")
         logMessageFile.write(logMessage+"\n")
 
-        while current != origin:
-            logMessage = "\tappending point to path: "+str(current.x())+"/"+str(current.y())
-            QgsMessageLog.logMessage(logMessage, "LCPNetwork")
-            logMessageFile.write(logMessage+"\n")
-
-            pathLine.append(current)
-            neighbors = self.getNeighbors(current, baseRaster, costMap)
-            logMessage = "\t\tgetting neighbors: "+str(len(neighbors))
-            QgsMessageLog.logMessage(logMessage, "LCPNetwork")
-            logMessageFile.write(logMessage+"\n")
-            
-        
-            minValue = costMap[int(current.x()), int(current.y())]
- 
-            logMessage = "\t\tminValue: "+str(minValue)
-            QgsMessageLog.logMessage(logMessage, "LCPNetwork")
-            logMessageFile.write(logMessage+"\n")
-      
-            lastCurrent = current
-
-            for neighbor in neighbors:
-         
-                logMessage = "\t\t\tchecking neighbor: "+str(neighbor.x())+"/"+str(neighbor.y())
-                QgsMessageLog.logMessage(logMessage, "LCPNetwork")
-                logMessageFile.write(logMessage+"\n")
-
-                # if already in path:
-                alreadyInPath = False 
-                for pathPoint in pathLine:
-                    if pathPoint.sqrDist(neighbor)<1.0:
-                        alreadyInPath = True
-                        break
-
-                if alreadyInPath:  
-                    logMessage = "\t\t\tneighbor is already in path so it is ignored"
-                    QgsMessageLog.logMessage(logMessage, "LCPNetwork")
-                    logMessageFile.write(logMessage+"\n")
-                    continue
- 
-                logMessage = "\t\t\tcost map: "+str(costMap[int(neighbor.x()),int(neighbor.y())])
-                QgsMessageLog.logMessage(logMessage, "LCPNetwork")
-                logMessageFile.write(logMessage+"\n")
-
-                if costMap[int(neighbor.x()),int(neighbor.y())] <= minValue:
-                    minValue = costMap[int(neighbor.x()),int(neighbor.y())]
-                    current = neighbor
-            
-            if current==lastCurrent:
-                logMessage = "Least-cost path incomplete. No viable path was found from: "+str(originGeo.x())+"/"+str(originGeo.y())+" to: "+str(destinationGeo.x())+"/"+str(destinationGeo.y())
-                QMessageBox.information(None, "ERROR!", logMessage)
-                QgsMessageLog.logMessage(logMessage, "LCPNetwork")
-                logMessageFile.write(logMessage+"\n")  
-                break
-
-        pathLine.append(current)
+        initPathLine = []
+        pathLine = self.getPath(destination, origin, baseRaster, costMap, logMessageFile, initPathLine)
 
         globalPath = []
         for localPoint in pathLine:
@@ -557,7 +560,7 @@ class LCPNetwork:
                 QgsMessageLog.logMessage(logMessage, "LCPNetwork") 
                 logMessageFile.write(logMessage+"\n")
 
-                pathLine = self.getPath(source, destination, baseRaster, distances,logMessageFile)
+                pathLine = self.getGlobalPath(source, destination, baseRaster, distances, logMessageFile)
                 if pathLine is None:
                     QMessageBox.information(None, "ERROR!", "Route could not be found for destination: "+str(destIndex), "LCPNetwork")
                     return
