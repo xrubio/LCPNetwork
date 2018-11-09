@@ -39,7 +39,8 @@ from qgis.core import QgsVectorLayer
 from qgis.core import QgsContrastEnhancement
 from qgis.core import QgsFeature
 from qgis.core import QgsGeometry
- 
+
+import sys
 import numpy.ma as ma
 
 import timeit
@@ -276,28 +277,16 @@ class LCPNetwork:
         return True
 
 
-    def getNeighbors(self, point, surface, costMap ):
+    def getNeighbors(self, point, surface):
         """ current: only four direct neighbors """
         neighbors = list()
-        nodata = int(surface.GetRasterBand(1).GetNoDataValue())
 
-        candidate = QgsPoint(point.x()-1, point.y())
-        if self.isInside(candidate, surface): # and costMap[int(candidate.x()), int(candidate.y())] != nodata:
-            neighbors.append(candidate)
-
-        candidate = QgsPoint(point.x()+1, point.y())
-        if self.isInside(candidate, surface): # and costMap[int(candidate.x()), int(candidate.y())] != nodata:
-            neighbors.append(candidate)
-
-        candidate = QgsPoint(point.x(), point.y()-1)
-        if self.isInside(candidate, surface): # and costMap[int(candidate.x()), int(candidate.y())] != nodata:
-            neighbors.append(candidate)
-
-        candidate = QgsPoint(point.x(), point.y()+1)
-        if self.isInside(candidate, surface): # and costMap[int(candidate.x()), int(candidate.y())] != nodata:
-            neighbors.append(candidate)
-
-#        QgsMessageLog.logMessage("num neighbors of: "+point.toString(0) + " is: " + str(len(neighbors)), "LCPNetwork")
+        for i in range(-1,2):
+            for j in range(-1,2):
+                candidate = QgsPoint(point.x()+i, point.y()+j)
+                if self.isInside(candidate, surface):
+                    neighbors.append(candidate)
+        QgsMessageLog.logMessage("num neighbors of: "+point.toString(0) + " is: " + str(len(neighbors)), "LCPNetwork")
         return neighbors            
 
     def getMinimumUnvisited(self, visited, distances ):
@@ -325,11 +314,21 @@ class LCPNetwork:
         selected = np.random.randint(len(candidates[0]))
         return QgsPoint(candidates[0][selected], candidates[1][selected])
 
+
+    def isDiagonal(self, centre, candidate):
+        if centre.x()==candidate.x() or centre.y()==candidate.y():
+            return False
+        
+        return True            
+
     def computeCost( self, originGeo, baseRaster, logMessageFile):        
         origin = self.getCell(originGeo, baseRaster)
         costValues = baseRaster.GetRasterBand(1).ReadAsArray()
 
         if not self.isInside(origin, baseRaster):
+            logMessage = "error - origin point: "+str(originGeo.x())+"/"+str(originGeo.y())+" local coords: "+str(origin.x())+"/"+str(origin.y())+" falls outside raster limits"
+            QgsMessageLog.logMessage(logMessage, "LCPNetwork")
+            logMessageFile.write(logMessage+"\n")
             return None
 
         # initialize helper matrices
@@ -356,7 +355,7 @@ class LCPNetwork:
         i = 0
         while candidates==True: 
             i = i+1
-            neighbors = self.getNeighbors(current, baseRaster, costValues)
+            neighbors = self.getNeighbors(current, baseRaster)
 #            QgsMessageLog.logMessage("iteration: "+str(i)+" current: "+str(current.x())+"/"+str(current.y())+" with num neighbors: "+str(len(neighbors)), "LCPNetwork")
             
             for neighbor in neighbors:
@@ -367,7 +366,10 @@ class LCPNetwork:
                 # they have a slightly random value so they don't generate exactly the same costs on the final map
                 if cost == nodata:
                     cost = maxValue*1.01
-                
+                # diagonals cost more
+                elif self.isDiagonal(current,neighbor):
+                    cost = cost*np.sqrt(2)
+
                 tentativeDistance = distances[int(current.x()), int(current.y())] + cost
 #               QgsMessageLog.logMessage("\ttentative distance: "+str(tentativeDistance)+" with distance: "+str(distances[int(current.x()), int(current.y())]) + " and cost: "+str(cost), "LCPNetwork")
                 # cost can never be negative
@@ -395,9 +397,9 @@ class LCPNetwork:
         if not self.isInside(origin, baseRaster) or not self.isInside(current, baseRaster):
             return None
 
-        logMessage = "getting path from current: "+str(current.x())+"/"+str(current.y())+" to origin: "+str(origin.x())+"/"+str(origin.y())
-        QgsMessageLog.logMessage(logMessage, "LCPNetwork")
-        logMessageFile.write(logMessage+"\n")
+#        logMessage = "getting path from current: "+str(current.x())+"/"+str(current.y())+" to origin: "+str(origin.x())+"/"+str(origin.y())
+#        QgsMessageLog.logMessage(logMessage, "LCPNetwork")
+#        logMessageFile.write(logMessage+"\n")
             
         pathLine.append(current)
 
@@ -407,15 +409,15 @@ class LCPNetwork:
               
         minValue = costMap[int(current.x()), int(current.y())]
 
-        neighbors = self.getNeighbors(current, baseRaster, costMap)
+        neighbors = self.getNeighbors(current, baseRaster)
 
         candidates = []
 
         for neighbor in neighbors:
      
-            logMessage = "\t\t\tchecking neighbor: "+str(neighbor.x())+"/"+str(neighbor.y())
-            QgsMessageLog.logMessage(logMessage, "LCPNetwork")
-            logMessageFile.write(logMessage+"\n")
+#            logMessage = "\t\t\tchecking neighbor: "+str(neighbor.x())+"/"+str(neighbor.y())
+#            QgsMessageLog.logMessage(logMessage, "LCPNetwork")
+#            logMessageFile.write(logMessage+"\n")
 
             # if already in path:
             alreadyInPath = False 
@@ -425,14 +427,14 @@ class LCPNetwork:
                     break
 
             if alreadyInPath:  
-                logMessage = "\t\t\tneighbor is already in path so it is ignored"
-                QgsMessageLog.logMessage(logMessage, "LCPNetwork")
-                logMessageFile.write(logMessage+"\n")
+#                logMessage = "\t\t\tneighbor is already in path so it is ignored"
+#                QgsMessageLog.logMessage(logMessage, "LCPNetwork")
+#                logMessageFile.write(logMessage+"\n")
                 continue
 
-            logMessage = "\t\t\tcost map: "+str(costMap[int(neighbor.x()),int(neighbor.y())])
-            QgsMessageLog.logMessage(logMessage, "LCPNetwork")
-            logMessageFile.write(logMessage+"\n")
+#           logMessage = "\t\t\tcost map: "+str(costMap[int(neighbor.x()),int(neighbor.y())])
+#            QgsMessageLog.logMessage(logMessage, "LCPNetwork")
+#            logMessageFile.write(logMessage+"\n")
 
             if costMap[int(neighbor.x()),int(neighbor.y())] < minValue:
                 candidates = []
@@ -466,6 +468,10 @@ class LCPNetwork:
         logMessage = "local coords from "+str(origin.x())+"/"+str(origin.y())+" to: "+str(destination.x())+"/"+str(destination.y())
         QgsMessageLog.logMessage(logMessage, "LCPNetwork")
         logMessageFile.write(logMessage+"\n")
+
+        # recursive function to extract the path from the cost map 
+        # recursivity is used here to backtrack if you have 2 cells with the exact same accumulated cost but one is not a correct path
+        sys.setrecursionlimit(1000000)
 
         initPathLine = []
         pathLine = self.getPath(destination, origin, baseRaster, costMap, logMessageFile, initPathLine)
@@ -539,8 +545,6 @@ class LCPNetwork:
             QgsMessageLog.logMessage(logMessage, "LCPNetwork")
             logMessageFile.write(logMessage+"\n")
             
-
-
             if distances is None:
                 QMessageBox.information(None, "ERROR!", "Cost map could not be computed for source point: "+str(index), "LCPNetwork")
                 return 
