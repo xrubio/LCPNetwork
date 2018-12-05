@@ -493,11 +493,14 @@ class LCPNetwork:
         destination = self.getCell(destinationGeo, baseRaster)
             
         if not self.isInside(destination, baseRaster):
+            logMessage = "destination not inside base raster!" 
+            QgsMessageLog.logMessage(logMessage, "LCPNetwork")
+            logMessageFile.write(logMessage+"\n")
             return None
 
-#       logMessage = "getting path from "+str(originGeo.x())+"/"+str(originGeo.y())+" to: "+str(destinationGeo.x())+"/"+str(destinationGeo.y())
-#        QgsMessageLog.logMessage(logMessage, "LCPNetwork")
-#        logMessageFile.write(logMessage+"\n")
+        logMessage = "getting path from "+str(originGeo.x())+"/"+str(originGeo.y())+" to: "+str(destinationGeo.x())+"/"+str(destinationGeo.y())
+        QgsMessageLog.logMessage(logMessage, "LCPNetwork")
+        logMessageFile.write(logMessage+"\n")
 
 #        logMessage = "local coords from "+str(origin.x())+"/"+str(origin.y())+" to: "+str(destination.x())+"/"+str(destination.y())
 #        QgsMessageLog.logMessage(logMessage, "LCPNetwork")
@@ -518,7 +521,7 @@ class LCPNetwork:
 
 
     def storeCostMap(self, costMap, baseRaster, index):
-        outputName = os.path.dirname(__file__)+"/distances"+str(os.getpid())+"_"+str(index)+".tif"
+        outputName = os.path.dirname(__file__)+"/distances"+self._id+"_"+str(index)+".tif"
 
         newRaster = gdal.GetDriverByName('GTiff').Create(outputName, baseRaster.RasterXSize, baseRaster.RasterYSize, 1, gdal.GDT_Float32)
         newRaster.SetProjection(baseRaster.GetProjection())
@@ -532,14 +535,11 @@ class LCPNetwork:
         # compute cost map for the entire area
         startCost = timeit.default_timer()
  
-        logMessage = "%.2f"%(timeit.default_timer()-start)+" - computing cost map from source point: "+str(index+1)+" at position: "+str(point.x())+"/"+str(point.y())
-        QgsMessageLog.logMessage(logMessage, "LCPNetwork") 
-        logMessageFile.write(logMessage+"\n")
-       
-        logMessage = "%.2f"%(timeit.default_timer()-start)+" - process "+str(os.getpid())+" computing cost map from source point: "+str(index+1)+" at position: "+str(point.x())+"/"+str(point.y())
+        logMessage = "%.2f"%(timeit.default_timer()-start)+" - id "+self._id+" computing cost map from source point: "+str(index+1)+" at position: "+str(point.x())+"/"+str(point.y())
         QgsMessageLog.logMessage(logMessage, "LCPNetwork") 
         logMessageFile.write(logMessage+"\n")
 
+        """
         distances = self.computeCost(point, baseRaster, logMessageFile)
 
         logMessage = "\t%.2f"%(timeit.default_timer()-start)+" - Done! seconds to compute cost map: " + str("%.2f"%(timeit.default_timer()-startCost))
@@ -550,7 +550,12 @@ class LCPNetwork:
             QMessageBox.information(None, "ERROR!", "Cost map could not be computed for point: "+str(index), "LCPNetwork")
             return 
 
-        self.storeCostMap(distances, baseRaster, index)      
+        self.storeCostMap(distances, baseRaster, index)   
+        """
+        name = os.path.dirname(__file__)+"/distances3362_"+str(index)+".tif"
+        distanceBase = gdal.Open(name)
+
+        distances = np.array(distanceBase.GetRasterBand(1).ReadAsArray())
 
         logMessage = "\t%.2f"%(timeit.default_timer()-start)+" - cost map stored; estimating least-cost paths..."
         QgsMessageLog.logMessage(logMessage, "LCPNetwork") 
@@ -564,7 +569,6 @@ class LCPNetwork:
 #            logMessage = "\t\t%.2f"%(timeit.default_timer()-start)+" - estimating path to dest: "+str(destIndex)+"/"+str(len(destinations))+" at pos:" +str(destination.x())+"/"+str(destination.y())
 #            QgsMessageLog.logMessage(logMessage, "LCPNetwork") 
 #            logMessageFile.write(logMessage+"\n")
-
             pathLine = self.getGlobalPath(point, destination, baseRaster, distances, logMessageFile)
             if pathLine is None:
                 QMessageBox.information(None, "ERROR!", "Route could not be found for destination: "+str(destIndex), "LCPNetwork")
@@ -582,12 +586,12 @@ class LCPNetwork:
 
     def runAlgorithm(self):
         start = timeit.default_timer()
-        logMessageFile = open("logLCP"+str(os.getpid())+".txt", "w", 0)
+        self._id = str(np.random.randint(1, 5000))
+        logMessageFile = open("logLCP"+self._id+".txt", "w", 0)
 
-        logMessage = "LCPNetwork plugin init - loading points and base raster layers with pid:"+str(os.getpid())
+        logMessage = "LCPNetwork plugin init - loading points and base raster layers with id: "+self._id
         QgsMessageLog.logMessage(logMessage, "LCPNetwork")
         logMessageFile.write(logMessage+"\n")
-
 
         origins,destinations = self.loadPoints()
         baseRaster = self.loadBaseRaster()
@@ -616,7 +620,7 @@ class LCPNetwork:
         ## create the list of lcps
         lcps = []
 
-        numThreads = 8#multiprocessing.cpu_count()
+        numThreads = multiprocessing.cpu_count()
         logMessage = "creating "+str(numThreads)+" threads"
         QgsMessageLog.logMessage(logMessage, "LCPNetwork") 
         logMessageFile.write(logMessage+"\n")
@@ -627,7 +631,7 @@ class LCPNetwork:
         for source in pointsListO:
             pool.add_task(self.computeOnePath, source, index, start, baseRaster, pointsListD, lcps, logMessageFile)
             index = index + 1 
-
+            
         pool.wait_completion()
 
         logMessage = "all lcps computed at time: " + str("%.2f"%(timeit.default_timer()-start))
@@ -635,16 +639,14 @@ class LCPNetwork:
         logMessageFile.write(logMessage+"\n")
 
         for i in range(index):
-            outputName = os.path.dirname(__file__)+"/distances"+str(os.getpid())+"_"+str(i)+".tif"
-            newRasterQGIS = QgsRasterLayer(outputName, "distances"+str(os.getpid())+"_"+str(i))
+            outputName = os.path.dirname(__file__)+"/distances"+self._id+"_"+str(i)+".tif"
+            newRasterQGIS = QgsRasterLayer(outputName, "distances"+self._id+"_"+str(i))
             newRasterQGIS.setContrastEnhancement(QgsContrastEnhancement.StretchToMinimumMaximum)
             QgsMapLayerRegistry.instance().addMapLayer(newRasterQGIS)
 
         # add the list of lcps to the network layer
         network = self.iface.addVectorLayer("LineString?crs=" + baseRaster.GetProjection(), "least cost path network", "memory")
 
-#        for lcp in lcps:
-#            network.dataProvider().addFeatures([lcp])
         network.dataProvider().addFeatures(lcps)
 
         logMessage = "LCPNetwork plugin finished! time (sec.): " + str("%.2f"%(timeit.default_timer()-start))
