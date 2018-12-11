@@ -539,7 +539,6 @@ class LCPNetwork:
         QgsMessageLog.logMessage(logMessage, "LCPNetwork") 
         logMessageFile.write(logMessage+"\n")
 
-        """
         distances = self.computeCost(point, baseRaster, logMessageFile)
 
         logMessage = "\t%.2f"%(timeit.default_timer()-start)+" - Done! seconds to compute cost map: " + str("%.2f"%(timeit.default_timer()-startCost))
@@ -551,8 +550,8 @@ class LCPNetwork:
             return 
 
         self.storeCostMap(distances, baseRaster, index)   
-        """
-        name = os.path.dirname(__file__)+"/distances3362_"+str(index)+".tif"
+        
+        name = os.path.dirname(__file__)+"/distances"+self._id+"_"+str(index)+".tif"
         distanceBase = gdal.Open(name)
 
         distances = np.array(distanceBase.GetRasterBand(1).ReadAsArray())
@@ -566,9 +565,9 @@ class LCPNetwork:
             if destination == point:
                 continue
             
-#            logMessage = "\t\t%.2f"%(timeit.default_timer()-start)+" - estimating path to dest: "+str(destIndex)+"/"+str(len(destinations))+" at pos:" +str(destination.x())+"/"+str(destination.y())
-#            QgsMessageLog.logMessage(logMessage, "LCPNetwork") 
-#            logMessageFile.write(logMessage+"\n")
+            logMessage = "\t\t%.2f"%(timeit.default_timer()-start)+" - estimating path to dest: "+str(destIndex)+"/"+str(len(destinations))+" at pos:" +str(destination.x())+"/"+str(destination.y())
+            QgsMessageLog.logMessage(logMessage, "LCPNetwork") 
+            logMessageFile.write(logMessage+"\n")
             pathLine = self.getGlobalPath(point, destination, baseRaster, distances, logMessageFile)
             if pathLine is None:
                 QMessageBox.information(None, "ERROR!", "Route could not be found for destination: "+str(destIndex), "LCPNetwork")
@@ -587,7 +586,7 @@ class LCPNetwork:
     def runAlgorithm(self):
         start = timeit.default_timer()
         self._id = str(np.random.randint(1, 5000))
-        logMessageFile = open("logLCP"+self._id+".txt", "w", 0)
+        logMessageFile = open(os.path.dirname(__file__)+"/logLCP"+self._id+".txt", "w", 0)
 
         logMessage = "LCPNetwork plugin init - loading points and base raster layers with id: "+self._id
         QgsMessageLog.logMessage(logMessage, "LCPNetwork")
