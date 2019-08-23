@@ -8,9 +8,9 @@
 
 [general]
 name=Least-Cost-Paths Network
-qgisMinimumVersion=2.0
+qgisMinimumVersion=3.0
 description=Compute the network of Least-Cost Paths between multiple origins and destinations based on a cost surface map
-version=version 0.1.4
+version=version 0.1.5
 author=Xavier Rubio-Campillo
 email=xavier.rubio@ed.ac.uk
 
@@ -24,7 +24,7 @@ repository=https://github.com/xrubio/LCPNetwork
 # Recommended items:
 
 # Uncomment the following line and add your changelog:
-changelog=bugfixes in log messages and computation
+changelog=updated to QGIS 3.X
 
 # Tags are comma separated with spaces allowed
 tags=analysis, ecology, routing, archaeology, mobility, Least-Cost Paths
