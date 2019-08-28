@@ -516,22 +516,11 @@ class LCPNetwork(object):
         if distances is None:
             QMessageBox.information(None, "ERROR!", "Cost map could not be computed for point: "+str(index), tag="LCPNetwork", level=Qgis.Warning)
             return "error"
-        logMessage = "%.2f"%(timeit.default_timer()-start)+" - id "+self._id+" thread: "+current_thread().name+"AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-        QgsMessageLog.logMessage(logMessage, tag="LCPNetwork", level=Qgis.Info)
-        logMessageFile.write(logMessage+"\n")
 
         self.storeCostMap(distances, baseRaster, index)   
-        logMessage = "%.2f"%(timeit.default_timer()-start)+" - id "+self._id+" thread: "+current_thread().name+"BBBBBBBBBBBBBBBBBBBB"
-        QgsMessageLog.logMessage(logMessage, tag="LCPNetwork", level=Qgis.Info)
-        logMessageFile.write(logMessage+"\n")
-        
         name = os.path.dirname(__file__)+"/distances"+self._id+"_"+str(index)+".tif"
         distanceBase = gdal.Open(name)
         
-        logMessage = "%.2f"%(timeit.default_timer()-start)+" - id "+self._id+" thread: "+current_thread().name+"CCCCCCCCCCCCCCCCCCCCCCCCCCC"
-        QgsMessageLog.logMessage(logMessage, tag="LCPNetwork", level=Qgis.Info)
-        logMessageFile.write(logMessage+"\n")
-
         distances = np.array(distanceBase.GetRasterBand(1).ReadAsArray())
 
         logMessage = "\t%.2f"%(timeit.default_timer()-start)+" thread: "+current_thread().name+" - cost map stored; estimating least-cost paths..."
@@ -601,7 +590,7 @@ class LCPNetwork(object):
         ## create the list of lcps
         lcps = []
 
-        numThreads = 4 #multiprocessing.cpu_count()
+        numThreads = os.cpu_count()
         logMessage = "creating "+str(numThreads)+" threads"
         QgsMessageLog.logMessage(logMessage, tag="LCPNetwork", level=Qgis.Info)
         logMessageFile.write(logMessage+"\n")
@@ -613,9 +602,8 @@ class LCPNetwork(object):
             results.append(pool.submit(self.computeOnePath, source, index, start, baseRaster, pointsListD, lcps, logMessageFile))
             index = index + 1 
           
-#       futures.wait(results, return_when=futures.ALL_COMPLETED)
         for future in futures.as_completed(results):     
-            logMessageFile.write("WTF "+future.result()+"\n")
+            logMessageFile.write(future.result()+"\n")
  
         logMessage = "all lcps computed at time: " + str("%.2f"%(timeit.default_timer()-start))
         QgsMessageLog.logMessage(logMessage, tag="LCPNetwork", level=Qgis.Info)
